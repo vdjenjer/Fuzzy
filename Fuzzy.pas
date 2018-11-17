@@ -19,8 +19,10 @@ type TrapMF = auto class
   end;
 end;
   
-type Lingvo = class
-  
+type Lingvo = auto class
+  name: string;
+  opr: (real, real);
+  funcs: List<TrapMF>; 
 end;
     
 implementation
