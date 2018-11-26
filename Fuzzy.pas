@@ -5,21 +5,49 @@ interface
 uses GraphABC;
 
 type
-  TrapMF = auto class
+  MF = class
     name: string;
+    constructor (name: string);
+    begin
+      self.name := name;
+    end;
+    function fun(x: real): real; virtual; abstract;
+    procedure plot(a, b: real; c: color); virtual; abstract;
+  end;
+  TrapMF = class(MF)
     a, b, c, d: real;
-    function fun(x: real): real;
-    procedure plot(a, b: real; c: color);
+    function fun(x: real): real; override;
+    procedure plot(a, b: real; c: color); override;
+    constructor (name: string; a, b, c, d: real);
+    begin
+      inherited create(name);
+      self.a := a;
+      self.b := b;
+      self.c := c;
+      self.d := d;
+    end;
   end;
 
 type
   Lingvar = auto class
     name: string;
     a, b: real;
-    funcs: List<TrapMF>; 
-    procedure plot;
-    procedure grid(nx, ny: integer);
+    funcs: List<MF>; 
+    procedure Plot;
+    procedure Grid(nx, ny: integer);
+    procedure Add(f: MF);
   end;
+
+type
+  Sugeno = auto class
+    input, output: List<Lingvar>;
+    rules: array [,] of integer;
+    function ToFuzzy(x: List<real>): List<List<real>>;
+    //function ToDefuzzy(x: List<real>): List<real>;
+  
+  end;
+
+
 
 implementation
 
@@ -27,7 +55,7 @@ implementation
 var
   colorsmf := new List<color>;
 
-
+/// Строим графики всех MF лингвистической переменной
 procedure Lingvar.plot;
 begin
   Window.Caption := 'Linguistic variable: ' + name;
@@ -42,7 +70,6 @@ end;
 
 function TrapMF.fun(x: real): real;
 begin
-  begin
     if x <= a then
       result := 0
     else if x <= b then 
@@ -53,7 +80,6 @@ begin
       result := (d - x) / (d - c)
     else
       result := 0;
-  end;
 end;
 
 ///Строит одну MF на отрезке [a, b]
@@ -79,6 +105,7 @@ begin
 end;
 
 ///Строит масштабную сетку
+
 procedure Lingvar.grid(nx, ny: integer);
 var
   Hu, Hv, rx, ry, Sx, Sy: real;
@@ -100,8 +127,32 @@ begin
   var dx := (b - a) / nx;
   var x := a;
   for var i := 1 to nx do
-    line(round((x + dx * i) * Sx + Hu), 0, round((x + dx * i) * Sx + Hu), Window.Width);
+  begin
+    var xx := round((x + dx * i) * Sx + Hu);
+    line(xx, 0, xx, Window.Width);
+  end;
   pen.Width := 2;
+end;
+
+
+
+function Sugeno.ToFuzzy(x: List<real>): List<List<real>>;
+begin
+  result := new List<List<real>>;
+  for var i := 0 to x.Count - 1 do
+    result[i] := new List<real>;
+  for var i := 0 to x.Count - 1 do
+  begin
+    var t := new List<real>;
+    for var j := 0 to input[i].funcs.Count - 1 do
+      t.Add(input[i].funcs[j].fun(x[i]));
+    result.Add(t);
+  end;
+end;
+
+procedure Lingvar.Add(f: MF);
+begin
+  self.funcs.Add(f);
 end;
 
 begin
