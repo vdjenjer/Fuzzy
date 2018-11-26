@@ -49,15 +49,16 @@ type
       self.output := output;
       self.rules := rules;
     end;
-    function ToFuzzy(x: List<real>): List<List<real>>; virtual; abstract;
+    function ToFuzzy(x: List<real>):  array [,] of real; virtual; abstract;
     //function ToDefuzzy(x: List<real>): List<real>; virtual; abstract;
   end;
+  
   Sugeno = class(FuzzyModel)
     constructor (input, output: List<Lingvar>; rules: array [,] of integer);
     begin
       inherited Create(input, output, rules);
     end;
-    function ToFuzzy(x: List<real>): List<List<real>>; override;
+    function ToFuzzy(x: List<real>):  array [,] of real; override;
     //function ToDefuzzy(x: List<real>): List<real>; override;
   end;
 
@@ -150,22 +151,15 @@ end;
 
 
 
-function Sugeno.ToFuzzy(x: List<real>): List<List<real>>;
+function Sugeno.ToFuzzy(x: List<real>): array [,] of real;
 begin
-  result := new List<List<real>>;
-  result.Capacity := x.Count;
+  var n := self.input.Select(lv -> lv.funcs.count).Max;// max qty of MF's in input
+  result := new real[self.input.Count, n];
+  
+
   for var i := 0 to x.Count - 1 do
-  begin
-    result[i] := new List<real>;
-    result[i].Capacity := self.input.
-  end;
-  for var i := 0 to x.Count - 1 do
-  begin
-    var t := new List<real>;
     for var j := 0 to input[i].funcs.Count - 1 do
-      t.Add(input[i].funcs[j].fun(x[i]));
-    result.Add(t);
-  end;
+      result[i, j] := input[i].funcs[j].fun(x[i]);
 end;
 
 procedure Lingvar.Add(f: MF);

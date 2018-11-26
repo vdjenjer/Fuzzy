@@ -26,5 +26,5 @@ begin
   var s := new Sugeno(new List<Lingvar>, new List<Lingvar>, new integer[5, 2]);
   s.input.Add(x);
   s.output.Add(y);
-  //s.ToFuzzy(lst(1.0)).PrintLines;
+  s.ToFuzzy(lst(0.22)).Println;
 end.
