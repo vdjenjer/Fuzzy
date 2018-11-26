@@ -39,12 +39,26 @@ type
   end;
 
 type
-  Sugeno = auto class
+  FuzzyModel = class
+    name: string;
     input, output: List<Lingvar>;
     rules: array [,] of integer;
-    function ToFuzzy(x: List<real>): List<List<real>>;
-    //function ToDefuzzy(x: List<real>): List<real>;
-  
+    constructor (input, output: List<Lingvar>; rules: array [,] of integer);
+    begin
+      self.input := input;
+      self.output := output;
+      self.rules := rules;
+    end;
+    function ToFuzzy(x: List<real>): List<List<real>>; virtual; abstract;
+    //function ToDefuzzy(x: List<real>): List<real>; virtual; abstract;
+  end;
+  Sugeno = class(FuzzyModel)
+    constructor (input, output: List<Lingvar>; rules: array [,] of integer);
+    begin
+      inherited Create(input, output, rules);
+    end;
+    function ToFuzzy(x: List<real>): List<List<real>>; override;
+    //function ToDefuzzy(x: List<real>): List<real>; override;
   end;
 
 
@@ -139,8 +153,12 @@ end;
 function Sugeno.ToFuzzy(x: List<real>): List<List<real>>;
 begin
   result := new List<List<real>>;
+  result.Capacity := x.Count;
   for var i := 0 to x.Count - 1 do
+  begin
     result[i] := new List<real>;
+    result[i].Capacity := self.input.
+  end;
   for var i := 0 to x.Count - 1 do
   begin
     var t := new List<real>;
